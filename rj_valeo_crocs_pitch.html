@@ -1,0 +1,1316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RJ Valeo — Digital PM for Crocs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --off-white: #f5f2ec;
+    --cream: #ede9e0;
+    --teal: #1a6b5a;
+    --teal-light: #2a8f78;
+    --teal-dim: #0f3d32;
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --mid: #6b6560;
+    --border: rgba(201,168,76,0.25);
+    --font-display: 'Playfair Display', Georgia, serif;
+    --font-mono: 'DM Mono', monospace;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--off-white);
+    font-family: var(--font-body);
+    font-weight: 300;
+    line-height: 1.7;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* Custom cursor */
+  .cursor {
+    width: 8px; height: 8px;
+    background: var(--gold);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.15s ease;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring {
+    width: 32px; height: 32px;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.35s ease, width 0.2s, height 0.2s, border-color 0.2s;
+    transform: translate(-50%, -50%);
+  }
+  .cursor-ring.expand {
+    width: 56px; height: 56px;
+    border-color: rgba(201,168,76,0.7);
+  }
+
+  /* Nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1.25rem 3rem;
+    background: rgba(10,10,10,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-name {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .nav-links {
+    display: flex; gap: 2rem;
+    list-style: none;
+  }
+  .nav-links a, .nav-links span {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--mid);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .nav-links a:hover, .nav-links span:hover { color: var(--gold); }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed; top: 0; left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+    width: 0%;
+    z-index: 101;
+    transition: width 0.1s linear;
+  }
+
+  /* Sections */
+  section {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 8rem 3rem 5rem;
+    position: relative;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  /* Hero */
+  #hero {
+    min-height: 100vh;
+    max-width: 100%;
+    padding: 0;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(26,107,90,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 70%, rgba(201,168,76,0.06) 0%, transparent 60%);
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+  .hero-content {
+    position: relative; z-index: 2;
+    text-align: center;
+    padding: 0 2rem;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.3s forwards;
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 7vw, 6.5rem);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--off-white);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.5s forwards;
+  }
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+  .hero-sub {
+    font-family: var(--font-body);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    font-weight: 300;
+    color: rgba(245,242,236,0.6);
+    max-width: 560px;
+    margin: 0 auto 3rem;
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.7s forwards;
+  }
+  .hero-name-block {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    color: var(--mid);
+    opacity: 0;
+    animation: fadeUp 0.9s ease 0.9s forwards;
+  }
+  .hero-name-block strong { color: var(--off-white); font-weight: 500; }
+  .scroll-hint {
+    position: absolute; bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.4s forwards;
+  }
+  .scroll-hint span {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    color: var(--mid);
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px; height: 48px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  /* Section labels */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    color: var(--teal-light);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .section-label.visible { opacity: 1; transform: none; }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--off-white);
+    margin-bottom: 1rem;
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+  }
+  .section-title.visible { opacity: 1; transform: none; }
+
+  .section-subtitle {
+    font-size: 1rem;
+    color: rgba(245,242,236,0.5);
+    margin-bottom: 3.5rem;
+    max-width: 560px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease 0.2s, transform 0.7s ease 0.2s;
+  }
+  .section-subtitle.visible { opacity: 1; transform: none; }
+
+  .gold-rule {
+    width: 48px; height: 2px;
+    background: var(--gold);
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.6s ease 0.15s, width 0.8s ease 0.15s;
+  }
+  .gold-rule.visible { opacity: 1; width: 48px; }
+
+  /* Proof table — interactive pairs */
+  .proof-grid {
+    display: flex; flex-direction: column; gap: 0;
+    border-top: 1px solid var(--border);
+  }
+  .proof-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease, background 0.2s;
+  }
+  .proof-row.visible { opacity: 1; transform: none; }
+  .proof-row:hover { background: rgba(26,107,90,0.07); }
+  .proof-row.expanded { background: rgba(26,107,90,0.1); }
+  .proof-cell {
+    padding: 1.25rem 1.5rem;
+  }
+  .proof-cell:first-child {
+    border-right: 1px solid var(--border);
+  }
+  .proof-need {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--mid);
+    line-height: 1.5;
+  }
+  .proof-answer {
+    font-size: 0.9rem;
+    color: var(--off-white);
+    font-weight: 400;
+    line-height: 1.6;
+  }
+  .proof-detail {
+    display: none;
+    grid-column: 1 / -1;
+    padding: 0 1.5rem 1.25rem;
+    font-size: 0.85rem;
+    color: rgba(245,242,236,0.6);
+    line-height: 1.7;
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+  .proof-row.expanded .proof-detail { display: block; }
+  .proof-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0.75rem 1.5rem;
+    background: rgba(201,168,76,0.06);
+    border-bottom: 1px solid var(--border);
+  }
+  .proof-header span {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  /* Stack diagram */
+  .stack-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 4rem;
+    align-items: start;
+  }
+  .stack-diagram {
+    position: relative;
+  }
+  .stack-node {
+    background: rgba(245,242,236,0.03);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.9rem 1.25rem;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.5s ease, transform 0.5s ease, background 0.2s, border-color 0.2s;
+  }
+  .stack-node.visible { opacity: 1; transform: none; }
+  .stack-node:hover, .stack-node.active {
+    background: rgba(26,107,90,0.15);
+    border-color: var(--teal-light);
+  }
+  .stack-node-label {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--gold);
+    font-weight: 500;
+  }
+  .stack-node-desc {
+    font-size: 0.78rem;
+    color: var(--mid);
+    margin-top: 0.25rem;
+  }
+  .stack-connector {
+    display: flex; align-items: center;
+    padding: 0.2rem 1.25rem;
+    gap: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .stack-connector.visible { opacity: 1; }
+  .connector-line {
+    width: 1px; height: 24px;
+    background: linear-gradient(to bottom, var(--teal-light), var(--gold));
+    margin-left: 1rem;
+  }
+  .connector-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--mid);
+    letter-spacing: 0.1em;
+  }
+  .stack-split {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .stack-info-panel {
+    background: rgba(245,242,236,0.02);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem;
+    min-height: 320px;
+  }
+  .stack-info-panel h3 {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    color: var(--gold);
+    margin-bottom: 0.75rem;
+    font-weight: 700;
+  }
+  .stack-info-panel p {
+    font-size: 0.88rem;
+    color: rgba(245,242,236,0.65);
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+  }
+  .stack-info-panel .pm-role {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--teal-light);
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  /* Incidents */
+  .incident-tabs {
+    display: flex; gap: 0; margin-bottom: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .incident-tab {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--mid);
+    padding: 0.9rem 1.75rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+    background: none; border-top: none; border-left: none; border-right: none;
+  }
+  .incident-tab:hover { color: var(--off-white); }
+  .incident-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+  .incident-panel {
+    display: none;
+    padding: 3rem 0 1rem;
+  }
+  .incident-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; }
+  .incident-what h3 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--off-white);
+    margin-bottom: 0.75rem;
+  }
+  .incident-what p {
+    font-size: 0.9rem;
+    color: rgba(245,242,236,0.55);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+  .incident-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid;
+    border-radius: 2px;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .tag-high { color: #e85d4a; border-color: rgba(232,93,74,0.4); }
+  .tag-med { color: var(--gold); border-color: rgba(201,168,76,0.4); }
+  .tag-triage { color: var(--teal-light); border-color: rgba(42,143,120,0.4); }
+  .incident-response h4 {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--teal-light);
+    margin-bottom: 1.25rem;
+  }
+  .response-step {
+    display: flex; gap: 1rem; margin-bottom: 1rem; align-items: flex-start;
+  }
+  .step-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--gold);
+    min-width: 1.5rem;
+    padding-top: 0.15rem;
+  }
+  .step-text {
+    font-size: 0.88rem;
+    color: rgba(245,242,236,0.75);
+    line-height: 1.65;
+  }
+  .lived-it {
+    margin-top: 2rem;
+    padding: 1rem 1.25rem;
+    background: rgba(26,107,90,0.1);
+    border-left: 2px solid var(--teal-light);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--teal-light);
+    line-height: 1.6;
+  }
+
+  /* Coordination model */
+  .coord-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start;
+  }
+  .coord-diagram {
+    position: relative; height: 420px;
+  }
+  .coord-center {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px; height: 100px;
+    background: var(--teal-dim);
+    border: 1.5px solid var(--teal-light);
+    border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 2;
+    text-align: center;
+  }
+  .coord-center-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    line-height: 1.3;
+  }
+  .coord-node {
+    position: absolute;
+    width: 80px; height: 80px;
+    background: rgba(245,242,236,0.03);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    z-index: 2;
+  }
+  .coord-node:hover {
+    background: rgba(201,168,76,0.08);
+    border-color: rgba(201,168,76,0.5);
+  }
+  .coord-node-label {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--off-white);
+    line-height: 1.3;
+  }
+  .coord-svg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+  .coord-list { list-style: none; }
+  .coord-list li {
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+    color: rgba(245,242,236,0.7);
+    line-height: 1.6;
+  }
+  .coord-list li strong {
+    color: var(--off-white);
+    font-weight: 500;
+    display: block;
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+    color: var(--gold);
+    margin-bottom: 0.25rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* Track record */
+  .track-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;
+  }
+  .track-card {
+    border: 1px solid var(--border);
+    padding: 2rem;
+    position: relative;
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease, background 0.2s;
+    cursor: pointer;
+  }
+  .track-card.visible { opacity: 1; transform: none; }
+  .track-card:hover { background: rgba(26,107,90,0.08); }
+  .track-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--teal), var(--gold));
+  }
+  .track-company {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--off-white);
+    margin-bottom: 0.25rem;
+  }
+  .track-role {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--mid);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.25rem;
+  }
+  .track-period {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--teal-light);
+    margin-bottom: 1.25rem;
+  }
+  .track-desc {
+    font-size: 0.87rem;
+    color: rgba(245,242,236,0.65);
+    line-height: 1.75;
+    margin-bottom: 1rem;
+  }
+  .track-metric {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--gold);
+    border-top: 1px solid var(--border);
+    padding-top: 0.75rem;
+  }
+
+  /* Sr PM slide */
+  .srpm-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--border);
+  }
+  .srpm-col {
+    padding: 2.5rem;
+  }
+  .srpm-col:first-child {
+    border-right: 1px solid var(--border);
+    background: rgba(232,93,74,0.04);
+  }
+  .srpm-col:last-child {
+    background: rgba(26,107,90,0.05);
+  }
+  .srpm-head {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+  .srpm-head.worry { color: #e85d4a; }
+  .srpm-head.solved { color: var(--teal-light); }
+  .srpm-item {
+    display: flex; gap: 0.75rem; align-items: flex-start;
+    margin-bottom: 1.25rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+  }
+  .srpm-item .icon { font-size: 0.9rem; min-width: 1.2rem; }
+  .srpm-item .text { color: rgba(245,242,236,0.7); }
+  .srpm-item .text em { color: var(--off-white); font-style: normal; font-weight: 500; }
+
+  /* Day 1 / Day 30 */
+  .day-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid var(--border);
+  }
+  .day-col {
+    padding: 2.5rem;
+  }
+  .day-col:first-child { border-right: 1px solid var(--border); }
+  .day-head {
+    font-family: var(--font-display);
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+  }
+  .day-head span { color: var(--gold); }
+  .day-subhead {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--mid);
+    margin-bottom: 2rem;
+  }
+  .day-item {
+    display: flex; gap: 0.75rem; align-items: flex-start;
+    margin-bottom: 1rem; font-size: 0.88rem; line-height: 1.6;
+    color: rgba(245,242,236,0.7);
+  }
+  .day-item::before {
+    content: '—';
+    color: var(--gold);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+  }
+
+  /* Closer */
+  #closer {
+    min-height: 60vh;
+    text-align: center;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative;
+  }
+  .closer-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 900;
+    color: var(--off-white);
+    margin-bottom: 1rem;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .closer-title.visible { opacity: 1; transform: none; }
+  .closer-sub {
+    font-size: 1rem;
+    color: var(--mid);
+    margin-bottom: 3rem;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.8s ease 0.15s, transform 0.8s ease 0.15s;
+  }
+  .closer-sub.visible { opacity: 1; transform: none; }
+  .closer-contact {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--off-white);
+    margin-bottom: 2rem;
+    line-height: 2.2;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.8s ease 0.25s, transform 0.8s ease 0.25s;
+  }
+  .closer-contact.visible { opacity: 1; transform: none; }
+  .closer-links {
+    display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.8s ease 0.35s, transform 0.8s ease 0.35s;
+  }
+  .closer-links.visible { opacity: 1; transform: none; }
+  .closer-link {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-decoration: none;
+    text-transform: uppercase;
+    padding: 0.65rem 1.5rem;
+    border: 1px solid rgba(201,168,76,0.3);
+    transition: all 0.2s;
+  }
+  .closer-link:hover {
+    background: rgba(201,168,76,0.1);
+    border-color: var(--gold);
+  }
+  .closer-kicker {
+    margin-top: 4rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.1rem;
+    color: rgba(245,242,236,0.35);
+    max-width: 480px;
+    opacity: 0;
+    transition: opacity 1s ease 0.5s;
+  }
+  .closer-kicker.visible { opacity: 1; }
+
+  /* Animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.4; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(1.15); }
+  }
+
+  /* Divider */
+  .section-divider {
+    width: 100%; max-width: 1200px; margin: 0 auto;
+    height: 1px; background: var(--border);
+  }
+
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    section { padding: 6rem 1.5rem 4rem; }
+    .proof-row { grid-template-columns: 1fr; }
+    .proof-cell:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .proof-header { grid-template-columns: 1fr; gap: 0.25rem; }
+    .stack-wrap, .coord-wrap, .srpm-grid, .day-grid { grid-template-columns: 1fr; }
+    .incident-panel.active { grid-template-columns: 1fr; }
+    .coord-diagram { height: 320px; }
+    .day-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    .srpm-col:first-child { border-right: none; border-bottom: 1px solid var(--border); }
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="progress-bar" id="progressBar"></div>
+
+<nav>
+  <div class="nav-name">RJ Valeo · CSM</div>
+  <ul class="nav-links">
+    <li><span onclick="navScroll('proof')">The case</span></li>
+    <li><span onclick="navScroll('stack')">The stack</span></li>
+    <li><span onclick="navScroll('incidents')">When it breaks</span></li>
+    <li><span onclick="navScroll('track')">Track record</span></li>
+    <li><span onclick="navScroll('closer')">Let's talk</span></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Digital Project Manager · eCommerce & Agile Delivery</div>
+    <h1 class="hero-title">Welcome to the<br><em>future</em> of project<br>management.</h1>
+    <p class="hero-sub">I use every tool available. I work at a high level. I hit the ground running.</p>
+    <div class="hero-name-block">
+      <strong>Richard J. Valeo, CSM</strong> &nbsp;·&nbsp; Georgetown, CO &nbsp;·&nbsp; Available immediately
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<div class="section-divider"></div>
+
+<!-- PROOF -->
+<section id="proof">
+  <div class="section-label">01 — The case</div>
+  <div class="gold-rule"></div>
+  <h2 class="section-title">What you asked for.<br>What you get.</h2>
+  <p class="section-subtitle">Every requirement from the JD. Every answer from 20 years of doing exactly this. Click any row.</p>
+
+  <div class="proof-grid">
+    <div class="proof-header">
+      <span>You need</span>
+      <span>I bring</span>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">End-to-end digital initiative ownership</div></div>
+      <div class="proof-cell"><div class="proof-answer">20+ years owning scope, timelines, dependencies, and outcomes across ecommerce and platform delivery</div></div>
+      <div class="proof-detail">Every role I've held for two decades has been end-to-end ownership. Not coordination support — full accountability for scope, schedule, risk, and outcome. Eptura, Meta, Understood.org, A&E. Same job, different scale.</div>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">Marketplace operations experience</div></div>
+      <div class="proof-cell"><div class="proof-answer">Onboarded Amazon FBA for a boutique publisher. Managed feed errors, regional listing misconfigs, inventory sync failures, and oversells firsthand.</div></div>
+      <div class="proof-detail">Every failure mode in the Rithum playbook — wrong-language listings appearing in markets where the product wasn't available, oversells from inventory sync lag, feed formatting rejections — I navigated all of it in a real production environment with real business consequences.</div>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">SFCC and Rithum fluency</div></div>
+      <div class="proof-cell"><div class="proof-answer">Deep familiarity with how data moves across the ecosystem, where it breaks, and what the PM does when it does.</div></div>
+      <div class="proof-detail">I know the stack end-to-end: SAP as source of truth, OIC as the translation layer, SFCC for DTC, Rithum for marketplace syndication, OMS for order routing. I know which node owns which failure and how to sequence the fix. That's not theoretical — it's pattern recognition from integration-driven delivery across multiple platforms.</div>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">Cross-functional coordination: Engineering, QA, Product, IT, vendors, regional teams</div></div>
+      <div class="proof-cell"><div class="proof-answer">This is the job I've done for 20 years. Eptura: ~10 distributed teams. A&E: 12–15 concurrent release streams. Meta: multi-platform, tight deadlines.</div></div>
+      <div class="proof-detail">I've run Scrum-of-Scrums across 10 distributed teams in the U.S. and India. I've coordinated 12–15 simultaneous release streams across engineering, QA, content, and UX. I've managed offshore QA in Costa Rica and vendors across multiple time zones. The coordination model is not something I'm learning — it's the job I show up to every day.</div>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">Partner to a Sr. PM — execution support, not competition</div></div>
+      <div class="proof-cell"><div class="proof-answer">I've operated as the execution layer alongside senior program leads across multiple engagements. I make the Sr. PM look good.</div></div>
+      <div class="proof-detail">This is a specific and important dynamic. I've been on both sides. I know what the Sr. PM is managing up, and I know that my job is to make sure nothing surprises them from below. I own the RAID log, the release artifacts, the defect triage cadence, and the stakeholder updates — so they can focus on strategy and visibility.</div>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">Agile delivery in complex environments</div></div>
+      <div class="proof-cell"><div class="proof-answer">CSM since 2014. SAFe Scrum Master. PI Planning. Scrum-of-Scrums. 12+ years, every context.</div></div>
+      <div class="proof-detail">Certified Scrum Master (Scrum Alliance, 2014–2028). SAFe Scrum Master. I've facilitated in regulated financial services (SunTrust/DigitasLBI), scaled enterprise SAFe (Eptura), multi-platform consumer product (Meta, A&E), and distressed program recovery (Understood.org). Agile isn't a methodology I follow — it's the operating system I run on.</div>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">Jira, Confluence, Smartsheet</div></div>
+      <div class="proof-cell"><div class="proof-answer">Daily tools across every role. Dashboards, burndowns, RAID logs, release artifacts — built and maintained.</div></div>
+      <div class="proof-detail">I don't just use these tools — I configure them, standardize them across teams, and design the reporting that gives leadership real visibility. At Eptura I standardized Jira workflows, fields, and dashboards across ~10 teams. At A&E I transitioned teams from ad-hoc tracking to structured Jira execution. At Understood.org I rebuilt the delivery infrastructure from scratch mid-program.</div>
+    </div>
+
+    <div class="proof-row" onclick="toggleProof(this)">
+      <div class="proof-cell"><div class="proof-need">Release readiness and post-launch stabilization</div></div>
+      <div class="proof-cell"><div class="proof-answer">Led go/no-go decisions at Meta (Ray-Ban Stories), Understood.org (full replatform), A&E (12–15 concurrent streams). I own the gate.</div></div>
+      <div class="proof-detail">Release readiness is a checklist with teeth: test coverage complete, critical defects resolved or deferred with signed-off risk acceptance, deployment runbook in Confluence, rollback plan staged, monitoring in place, post-launch coverage scheduled. I don't hand this off — I run it, and I stay in the room after the deploy.</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- STACK -->
+<section id="stack">
+  <div class="section-label">02 — The stack</div>
+  <div class="gold-rule"></div>
+  <h2 class="section-title">The ecosystem<br>I already speak.</h2>
+  <p class="section-subtitle">Click any node to see what it does, where it breaks, and where the PM lives in the picture.</p>
+
+  <div class="stack-wrap">
+    <div class="stack-diagram">
+      <div class="stack-node" onclick="showStackInfo('sap')" id="node-sap">
+        <div class="stack-node-label">SAP / ERP</div>
+        <div class="stack-node-desc">Source of truth — inventory, pricing, product master data</div>
+      </div>
+      <div class="stack-connector">
+        <div class="connector-line"></div>
+        <div class="connector-label">OIC translates &amp; routes</div>
+      </div>
+      <div class="stack-node" onclick="showStackInfo('oic')" id="node-oic">
+        <div class="stack-node-label">OIC Middleware</div>
+        <div class="stack-node-desc">Integration layer — translates and routes data between systems</div>
+      </div>
+      <div class="stack-connector">
+        <div class="connector-line"></div>
+        <div class="connector-label">feeds both channels</div>
+      </div>
+      <div class="stack-split">
+        <div class="stack-node" onclick="showStackInfo('sfcc')" id="node-sfcc" style="margin-bottom:0">
+          <div class="stack-node-label">SFCC</div>
+          <div class="stack-node-desc">DTC storefront — crocs.com</div>
+        </div>
+        <div class="stack-node" onclick="showStackInfo('rithum')" id="node-rithum" style="margin-bottom:0">
+          <div class="stack-node-label">Rithum</div>
+          <div class="stack-node-desc">Marketplace channels — Amazon, Walmart, Target+</div>
+        </div>
+      </div>
+      <div class="stack-connector">
+        <div class="connector-line"></div>
+        <div class="connector-label">orders flow to</div>
+      </div>
+      <div class="stack-node" onclick="showStackInfo('oms')" id="node-oms">
+        <div class="stack-node-label">OMS</div>
+        <div class="stack-node-desc">Order management — routing to fulfillment</div>
+      </div>
+    </div>
+
+    <div class="stack-info-panel" id="stackInfoPanel">
+      <h3>Select a node</h3>
+      <p>Click any component in the stack to see what it does, where it commonly breaks, and what the PM's role is when things go wrong.</p>
+      <div class="pm-role">The PM lives everywhere in this diagram — owning the flow between every node.</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- INCIDENTS -->
+<section id="incidents">
+  <div class="section-label">03 — When things break</div>
+  <div class="gold-rule"></div>
+  <h2 class="section-title">Pattern recognition<br>from real incidents.</h2>
+  <p class="section-subtitle">Three incident types. One response model. I've been in all three of these rooms.</p>
+
+  <div class="incident-tabs">
+    <button class="incident-tab active" onclick="showIncident('feed', this)">Feed failure</button>
+    <button class="incident-tab" onclick="showIncident('checkout', this)">Checkout defect</button>
+    <button class="incident-tab" onclick="showIncident('listing', this)">Listing misconfiguration</button>
+  </div>
+
+  <div class="incident-panel active" id="inc-feed">
+    <div class="incident-what">
+      <h3>Feed failure</h3>
+      <p>Rithum stops syncing product data to Amazon. Listings go dark. Inventory counters freeze. Orders stop. Revenue impact is immediate and visible.</p>
+      <div>
+        <span class="incident-tag tag-high">High severity</span>
+        <span class="incident-tag tag-med">Revenue impact</span>
+        <span class="incident-tag tag-triage">Integration</span>
+      </div>
+      <div class="lived-it">
+        Lived this: Amazon FBA onboarding for a boutique publisher. Feed formatting failures, listing suppression, inventory sync lag causing oversells. Real incidents, real consequences, real fixes.
+      </div>
+    </div>
+    <div class="incident-response">
+      <h4>PM response pattern</h4>
+      <div class="response-step"><div class="step-num">01</div><div class="step-text">Identify the break in the pipeline — SAP → OIC → Rithum. Which node owns the failure.</div></div>
+      <div class="response-step"><div class="step-num">02</div><div class="step-text">Route to the right team immediately. Integration, not marketplace ops, owns the pipe.</div></div>
+      <div class="response-step"><div class="step-num">03</div><div class="step-text">Set the SLA clock. Communicate business impact to stakeholders before they ask.</div></div>
+      <div class="response-step"><div class="step-num">04</div><div class="step-text">Track to resolution. Document the failure mode and the fix for the next incident.</div></div>
+    </div>
+  </div>
+
+  <div class="incident-panel" id="inc-checkout">
+    <div class="incident-what">
+      <h3>Checkout defect</h3>
+      <p>SFCC cart or payment flow breaks after a release. Customers can't complete purchases. Revenue stops on the DTC site. Clock is running from the moment it's detected.</p>
+      <div>
+        <span class="incident-tag tag-high">Critical</span>
+        <span class="incident-tag tag-med">Post-release</span>
+        <span class="incident-tag tag-triage">SFCC</span>
+      </div>
+      <div class="lived-it">
+        Lived this: led post-launch stabilization windows at Understood.org and A&E across 12–15 concurrent release streams. Defect triage bridges, go/no-go decisions, hotfix coordination under pressure.
+      </div>
+    </div>
+    <div class="incident-response">
+      <h4>PM response pattern</h4>
+      <div class="response-step"><div class="step-num">01</div><div class="step-text">Convene defect triage bridge immediately — Engineering, QA, Product in the room.</div></div>
+      <div class="response-step"><div class="step-num">02</div><div class="step-text">Assess severity and scope. Isolated cart bug or systemic checkout failure?</div></div>
+      <div class="response-step"><div class="step-num">03</div><div class="step-text">Hotfix vs. rollback decision — made with Engineering lead and Product. PM owns the call and communicates it.</div></div>
+      <div class="response-step"><div class="step-num">04</div><div class="step-text">ETA to stakeholders. Post-launch monitoring window extended. Incident documented.</div></div>
+    </div>
+  </div>
+
+  <div class="incident-panel" id="inc-listing">
+    <div class="incident-what">
+      <h3>Listing misconfiguration</h3>
+      <p>Products appear in the wrong regional marketplace — wrong language, wrong pricing tier, wrong fulfillment model. Customers think they're buying something they're not. Suppression risk is immediate.</p>
+      <div>
+        <span class="incident-tag tag-med">Medium severity</span>
+        <span class="incident-tag tag-med">Rithum / Regional</span>
+        <span class="incident-tag tag-triage">Feed mapping</span>
+      </div>
+      <div class="lived-it">
+        Lived this: Amazon FBA onboarding for a boutique publisher. Books listed in French and Spanish marketplaces without translated content. Customers bought and returned. I triaged the feed mapping error, coordinated the delist, and rebuilt the config.
+      </div>
+    </div>
+    <div class="incident-response">
+      <h4>PM response pattern</h4>
+      <div class="response-step"><div class="step-num">01</div><div class="step-text">Isolate the feed mapping error. Which SKUs, which markets, which field is wrong.</div></div>
+      <div class="response-step"><div class="step-num">02</div><div class="step-text">Coordinate with ops and content teams. Delist affected SKUs while the fix is staged.</div></div>
+      <div class="response-step"><div class="step-num">03</div><div class="step-text">Confirm suppression risk with marketplace team. Some errors trigger automated listing removal — get ahead of it.</div></div>
+      <div class="response-step"><div class="step-num">04</div><div class="step-text">Resubmit with verification. QA the relisted products before marking resolved.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- COORDINATION -->
+<section id="coordination">
+  <div class="section-label">04 — How I run a room</div>
+  <div class="gold-rule"></div>
+  <h2 class="section-title">No ambiguity.<br>No surprises.</h2>
+  <p class="section-subtitle">Everyone knows what they own. Risks surface before they become fires. The Sr. PM always has the full picture.</p>
+
+  <div class="coord-wrap">
+    <div class="coord-diagram">
+      <svg class="coord-svg" viewBox="0 0 360 420" id="coordSvg">
+        <line x1="180" y1="210" x2="60" y2="80" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <line x1="180" y1="210" x2="300" y2="80" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <line x1="180" y1="210" x2="40" y2="210" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <line x1="180" y1="210" x2="320" y2="210" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <line x1="180" y1="210" x2="60" y2="340" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+        <line x1="180" y1="210" x2="300" y2="340" stroke="rgba(201,168,76,0.2)" stroke-width="1"/>
+      </svg>
+      <div class="coord-center">
+        <div class="coord-center-label">RJ<br>Valeo<br>PM</div>
+      </div>
+      <div class="coord-node" style="top:30px;left:20px;"><div class="coord-node-label">Engineering</div></div>
+      <div class="coord-node" style="top:30px;right:20px;"><div class="coord-node-label">QA</div></div>
+      <div class="coord-node" style="top:170px;left:0;"><div class="coord-node-label">Product</div></div>
+      <div class="coord-node" style="top:170px;right:0;"><div class="coord-node-label">IT</div></div>
+      <div class="coord-node" style="bottom:30px;left:20px;"><div class="coord-node-label">Vendors</div></div>
+      <div class="coord-node" style="bottom:30px;right:20px;"><div class="coord-node-label">Regional<br>Teams</div></div>
+    </div>
+
+    <ul class="coord-list">
+      <li><strong>RAID log maintained in real time</strong>Not assembled the night before a steering committee. Risks, assumptions, issues, and dependencies logged as they emerge.</li>
+      <li><strong>Risks escalated with options</strong>Not just a flag — a flag with a recommendation and an ETA. The Sr. PM always has what they need to make a decision.</li>
+      <li><strong>Release artifacts in Confluence before the sprint closes</strong>Runbooks, deployment checklists, rollback plans — in place before the deploy, not scrambled together after.</li>
+      <li><strong>Stakeholder communication before they ask</strong>Weekly cadence. Clear ownership matrix. Nobody is surprised at standup.</li>
+      <li><strong>Post-launch stabilization owned, not handed off</strong>I stay in the room after the deploy. Monitoring window set, escalation path live, incident response staged.</li>
+    </ul>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- TRACK RECORD -->
+<section id="track">
+  <div class="section-label">05 — Track record</div>
+  <div class="gold-rule"></div>
+  <h2 class="section-title">Twenty years of<br>this exact job.</h2>
+  <p class="section-subtitle">Different industries, different scales. Same discipline.</p>
+
+  <div class="track-grid">
+    <div class="track-card">
+      <div class="track-company">Eptura</div>
+      <div class="track-role">Senior Scrum Master / Senior Program Lead</div>
+      <div class="track-period">Mar 2022 – Dec 2023 · Remote</div>
+      <div class="track-desc">Core member of the Agile PMO supporting ~10 distributed teams across engineering, UX, marketing, and data. U.S. and India. PI-aligned SAFe cadences. Scrum-of-Scrums. Standardized delivery workflows, Jira architecture, and executive reporting across the program.</div>
+      <div class="track-metric">35%+ delivery efficiency gain · ~10 teams · SAFe enterprise</div>
+    </div>
+
+    <div class="track-card">
+      <div class="track-company">Meta Platforms</div>
+      <div class="track-role">Senior Project Manager / Agile Delivery</div>
+      <div class="track-period">Jun 2021 – Jan 2022 · Remote</div>
+      <div class="track-desc">Multi-stream QA and delivery coordination across Facebook, Instagram, Oculus, and Portal. Key contributor to the Ray-Ban Stories AR glasses launch. Built internal tooling for delivery visibility. Tight SLAs, multi-platform, no room for release failures.</div>
+      <div class="track-metric">Ray-Ban Stories launch · multi-platform QA · shipped</div>
+    </div>
+
+    <div class="track-card">
+      <div class="track-company">Understood.org</div>
+      <div class="track-role">Senior PM / Agile Delivery Lead</div>
+      <div class="track-period">Feb 2019 – Mar 2020 · NY / Remote</div>
+      <div class="track-desc">Brought in late to rescue a distressed multi-year replatform: Sitecore to React + Contentful. Stabilized delivery, reset cadence, rebuilt stakeholder trust. Led full SDLC through QA, UAT, and production release. Primary escalation contact for engineering and executive leadership.</div>
+      <div class="track-metric">Distressed program rescued · replatform shipped · full SDLC</div>
+    </div>
+
+    <div class="track-card">
+      <div class="track-company">A&E Television Networks</div>
+      <div class="track-role">Agile Coach & Senior Scrum Master</div>
+      <div class="track-period">Mar 2016 – Feb 2018 · New York, NY</div>
+      <div class="track-desc">Led Agile delivery for History Vault and Lifetime Movie Club across web, mobile, and OTT. Coordinated 12–15 concurrent release streams across Engineering, UX, QA, and content. Transitioned teams from ad-hoc tracking to structured Jira execution.</div>
+      <div class="track-metric">12–15 concurrent streams · web + mobile + OTT · zero missed launches</div>
+    </div>
+
+    <div class="track-card">
+      <div class="track-company">DigitasLBI / SunTrust</div>
+      <div class="track-role">Senior Scrum Master (SAFe)</div>
+      <div class="track-period">Mar 2014 – Nov 2014 · Atlanta, GA</div>
+      <div class="track-desc">SAFe enterprise delivery in a regulated financial services environment. Two cross-functional teams. PI-aligned dependencies. Offshore QA coordination in Costa Rica. Governance-aligned reporting and escalation in a compliance-aware context.</div>
+      <div class="track-metric">SAFe · regulated financial services · offshore QA</div>
+    </div>
+
+    <div class="track-card">
+      <div class="track-company">OVRSTCH</div>
+      <div class="track-role">Founder / Product, Systems & Operations Lead</div>
+      <div class="track-period">Sep 2024 – Present · Remote</div>
+      <div class="track-desc">End-to-end digital commerce and physical product delivery. Amazon FBA onboarding for a boutique publisher — navigated catalog setup, feed formatting, regional listing misconfigs, inventory sync failures, and oversell incidents in a live production environment.</div>
+      <div class="track-metric">Amazon FBA · marketplace operations · real incidents, real fixes</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- SR PM -->
+<section id="srpm">
+  <div class="section-label">06 — The Sr. PM partner</div>
+  <div class="gold-rule"></div>
+  <h2 class="section-title">What the Sr. PM<br>stops worrying about.</h2>
+  <p class="section-subtitle">The day I'm in the room, these come off the list.</p>
+
+  <div class="srpm-grid">
+    <div class="srpm-col">
+      <div class="srpm-head worry">Before</div>
+      <div class="srpm-item"><div class="icon">—</div><div class="text"><em>Did the RAID log get updated?</em></div></div>
+      <div class="srpm-item"><div class="icon">—</div><div class="text"><em>Does anyone know about the dependency between the feed fix and the SAP sync?</em></div></div>
+      <div class="srpm-item"><div class="icon">—</div><div class="text"><em>Is QA going to be ready for Thursday's release gate?</em></div></div>
+      <div class="srpm-item"><div class="icon">—</div><div class="text"><em>Did the regional stakeholders get the status update?</em></div></div>
+      <div class="srpm-item"><div class="icon">—</div><div class="text"><em>Is there a runbook for post-launch?</em></div></div>
+      <div class="srpm-item"><div class="icon">—</div><div class="text"><em>What happens if the checkout breaks at 11pm?</em></div></div>
+    </div>
+    <div class="srpm-col">
+      <div class="srpm-head solved">After</div>
+      <div class="srpm-item"><div class="icon">✓</div><div class="text">Yes. Updated in real time, not assembled before the steering committee.</div></div>
+      <div class="srpm-item"><div class="icon">✓</div><div class="text">Yes. It's sequenced. The dependency was in the delivery plan before the sprint started.</div></div>
+      <div class="srpm-item"><div class="icon">✓</div><div class="text">Yes. Defect triage ran Tuesday. The go/no-go brief is already staged.</div></div>
+      <div class="srpm-item"><div class="icon">✓</div><div class="text">Yes. Before they asked. Weekly cadence, clear ownership, no surprises.</div></div>
+      <div class="srpm-item"><div class="icon">✓</div><div class="text">Yes. In Confluence. It was there before the deploy.</div></div>
+      <div class="srpm-item"><div class="icon">✓</div><div class="text">There's an escalation path, a contact list, and a rollback plan. All staged.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- DAY 1 / DAY 30 -->
+<section id="day">
+  <div class="section-label">07 — The ramp</div>
+  <div class="gold-rule"></div>
+  <h2 class="section-title">Day one.<br>Day thirty.</h2>
+  <p class="section-subtitle">What walks in the door, and what I will have built by the end of the first month.</p>
+
+  <div class="day-grid">
+    <div class="day-col">
+      <div class="day-head">Day <span>one.</span></div>
+      <div class="day-subhead">What I walk in with</div>
+      <div class="day-item">Delivery framework ready to deploy — RAID log, release readiness checklist, stakeholder communication cadence.</div>
+      <div class="day-item">Jira discipline from day one. Dashboards configured, sprint health visible, burndown running.</div>
+      <div class="day-item">20 years of pattern recognition for what's about to go wrong before it does.</div>
+      <div class="day-item">Fluency in the ecosystem: SFCC, Rithum, OMS, OIC, SAP. I know the stack and I know where it breaks.</div>
+      <div class="day-item">CSM, SAFe Scrum Master, and 12+ years of Agile delivery across enterprise, regulated, and high-velocity environments.</div>
+      <div class="day-item">Communication style already calibrated: executive-ready updates, technical fluency with engineering teams, stakeholder trust built fast.</div>
+    </div>
+    <div class="day-col">
+      <div class="day-head">Day <span>thirty.</span></div>
+      <div class="day-subhead">What I will have built</div>
+      <div class="day-item">Every integration dependency in the SFCC and Rithum ecosystem mapped. The three most fragile points identified.</div>
+      <div class="day-item">The project tracking that gives the Sr. PM full visibility without having to ask for it.</div>
+      <div class="day-item">Names, working styles, and escalation preferences of every team I coordinate with — Engineering, QA, Product, IT, vendors, regional leads.</div>
+      <div class="day-item">The release pipeline documented — runbooks, checklists, rollback plans — for every active initiative in scope.</div>
+      <div class="day-item">The first post-launch stabilization cycle completed cleanly, with the incident response model tested and refined.</div>
+      <div class="day-item">Something shipped.</div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- CLOSER -->
+<section id="closer">
+  <h2 class="closer-title">Let's get to work.</h2>
+  <p class="closer-sub">The deck was on time, on brand, and showed the work. So will everything else.</p>
+  <div class="closer-contact">
+    <strong>Richard J. Valeo, CSM</strong><br>
+    917-664-1750 &nbsp;·&nbsp; rjvaleo@gmail.com
+  </div>
+  <div class="closer-links">
+    <a class="closer-link" href="https://www.linkedin.com/in/rjvaleo" target="_blank">LinkedIn</a>
+    <a class="closer-link" href="https://rjvaleo.github.io/rj-polymath-site/" target="_blank">Portfolio</a>
+    <a class="closer-link" href="https://rjvaleo.github.io/enterprise-viewscreen/" target="_blank">Warp Screen Sim</a>
+  </div>
+  <div class="closer-kicker">
+    "I use every tool available. I work at a high level. I hit the ground running."
+  </div>
+</section>
+
+<script>
+// Smooth scroll to section
+function navScroll(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+document.addEventListener('mousemove', e => {
+  cursor.style.transform = `translate(${e.clientX - 4}px, ${e.clientY - 4}px)`;
+  ring.style.transform = `translate(${e.clientX - 16}px, ${e.clientY - 16}px)`;
+});
+document.querySelectorAll('a, button, .proof-row, .stack-node, .track-card, .incident-tab, .coord-node').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('expand'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('expand'));
+});
+
+// Progress bar
+window.addEventListener('scroll', () => {
+  const doc = document.documentElement;
+  const pct = (doc.scrollTop / (doc.scrollHeight - doc.clientHeight)) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+});
+
+// Scroll reveal
+const revealEls = document.querySelectorAll('.section-label, .gold-rule, .section-title, .section-subtitle, .proof-row, .stack-node, .stack-connector, .track-card, .closer-title, .closer-sub, .closer-contact, .closer-links, .closer-kicker');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 40);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+revealEls.forEach(el => observer.observe(el));
+
+// Proof row toggle
+function toggleProof(row) {
+  const wasOpen = row.classList.contains('expanded');
+  document.querySelectorAll('.proof-row').forEach(r => r.classList.remove('expanded'));
+  if (!wasOpen) row.classList.add('expanded');
+}
+
+// Stack info
+const stackData = {
+  sap: {
+    title: 'SAP / ERP',
+    body: 'The system of record. Every product, every price, every inventory count originates here. When SAP has bad data — wrong pricing tier, stale inventory count, incomplete product record — every downstream system inherits the problem.',
+    pm: 'PM role: when SFCC or Rithum shows wrong data, the investigation starts here. Coordinate with the SAP team to identify the data issue before routing to integration or platform teams.'
+  },
+  oic: {
+    title: 'OIC Middleware',
+    body: 'Oracle Integration Cloud — the translation and routing layer between SAP and the rest of the stack. It takes SAP data and formats it correctly for SFCC, Rithum, and the OMS. When OIC has a mapping error or goes down, data stops flowing to every connected system simultaneously.',
+    pm: 'PM role: the most common source of multi-system failures. A single OIC mapping error can break inventory on the DTC site AND Rithum feeds at the same time. Route to the integration team, not platform teams.'
+  },
+  sfcc: {
+    title: 'Salesforce Commerce Cloud',
+    body: 'The DTC storefront engine — crocs.com. Runs the product catalog, cart, checkout, promotions, and customer experience. Code is deployed as cartridges through dev → staging → production sandboxes. The PM owns the release gate at each promotion.',
+    pm: 'PM role: release readiness coordination, defect triage after deploys, go/no-go decisions, post-launch stabilization windows. Every SFCC release is a coordinated event across Engineering, QA, and Product.'
+  },
+  rithum: {
+    title: 'Rithum (formerly ChannelAdvisor)',
+    body: 'The marketplace management platform. Syndicates product feeds to Amazon, Walmart, Target+, and 400+ other channels. Manages inventory sync, pricing rules, order routing, and listing compliance. Feed failures and listing suppression are the most common PM escalation types.',
+    pm: 'PM role: triage feed failures, coordinate listing suppression resolution, manage integration escalations between Rithum and OMS. When Amazon listings go dark, the PM owns the bridge between marketplace ops, integration, and engineering.'
+  },
+  oms: {
+    title: 'OMS — Order Management',
+    body: 'Receives orders from both SFCC (DTC) and Rithum (marketplace) and routes them to the right warehouse or fulfillment partner. When the OMS loses sync with either upstream system, orders queue, ship late, or disappear entirely.',
+    pm: 'PM role: OMS failures are downstream of SFCC or Rithum failures. The PM coordinates triage across both the platform team and the OMS team, manages the SLA clock, and communicates order impact to business stakeholders.'
+  }
+};
+
+function showStackInfo(key) {
+  document.querySelectorAll('.stack-node').forEach(n => n.classList.remove('active'));
+  document.getElementById('node-' + key).classList.add('active');
+  const d = stackData[key];
+  document.getElementById('stackInfoPanel').innerHTML = `
+    <h3>${d.title}</h3>
+    <p>${d.body}</p>
+    <div class="pm-role">PM role: ${d.pm.replace('PM role: ', '')}</div>
+  `;
+}
+
+// Incidents
+function showIncident(id, btn) {
+  document.querySelectorAll('.incident-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.incident-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('inc-' + id).classList.add('active');
+}
+</script>
+</body>
+</html>
